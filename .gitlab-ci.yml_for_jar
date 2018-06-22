@@ -1,0 +1,34 @@
+variables:
+  JARNAME: "${project}-${version}.jar"
+  JARHOME: "/home/test/deploy/${group}/${project}"
+  RUN_CMD: "java -Xms128m -Xmx128m -Xmn128m -server -jar ${project}-${version}.jar --spring.profiles.active=test"
+  BUILDHOME: "${build-target}"
+  SHELLBASE: "/home/test/scripts/jarcmd"
+
+cache:
+  paths:
+  - ${BUILDHOME}/
+  
+stages:
+  - build
+  - deploy
+  - restart
+
+build_job:
+  stage: build
+  script: 
+  - mvn clean install -Dmaven.test.skip=true
+  allow_failure: false
+  when: manual
+   
+deploy_job:
+  stage: deploy
+  script:  
+  - mkdir -p ${JARHOME}
+  - cp -r $PWD/${BUILDHOME}/*.jar  ${JARHOME}
+  - ls -l ${JARHOME} 
+
+restart_job:
+  stage: restart
+  script:
+  - /bin/bash -x ${SHELLBASE}/restart.sh ${JARNAME} ${JARHOME} "${RUN_CMD}"

@@ -1,0 +1,34 @@
+variables:
+  ZIPNAME: "${project}-${version}.zip"
+  DPHOME: "/home/test/deploy/${group}/${project}" 
+  BUILDHOME: "${build-target}"
+  SHELLBASE: "/home/test/scripts/jarcmd"
+
+cache:
+  paths:
+  - ${BUILDHOME}/
+  
+stages:
+  - build
+  - deploy
+  - restart
+
+build_job: 
+  stage: build
+  script: 
+  - mvn clean install -Dmaven.test.skip=true
+  allow_failure: false
+  when: manual
+   
+deploy_job:
+  stage: deploy
+  script:  
+  - mkdir -p ${DPHOME}
+  - \rm -rf  ${DPHOME}/bin/*  ${DPHOME}/conf/* ${DPHOME}/lib/*
+  - unzip $PWD/${BUILDHOME}/${ZIPNAME}  -d  ${DPHOME}
+  - ls -l ${DPHOME} 
+
+restart_job:
+  stage: restart
+  script:
+  - /bin/bash -x ${SHELLBASE}/ziprestart.sh ${DPHOME} test

@@ -1,0 +1,24 @@
+#!/bin/bash
+
+dppath=$1
+active=$2
+
+rmmark(){
+cd  ${dppath}/bin
+sed -i "s/^M//g"  `ls .`
+chmod 755  ${dppath}/bin/*
+}
+
+stop_app(){
+cd  ${dppath}/bin && ./shutdown.sh
+}
+
+start_app(){
+cd  ${dppath}/bin && ./startup.sh ${active}
+}
+
+rmmark
+sleep 1
+stop_app
+sleep 3
+start_app

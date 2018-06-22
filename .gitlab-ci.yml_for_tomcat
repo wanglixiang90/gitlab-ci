@@ -1,0 +1,34 @@
+variables:
+  BUILDHOME: "${build-target}"
+  BINHOME: "/home/test/${tomcat_bin_path}"
+  CODEDIR: "/home/test/deploy/${tomcat_code_deploy_path}"
+
+cache:
+  paths:
+  - ${BUILDHOME}/
+  
+stages:
+  - build
+  - deploy
+  - restart
+
+build_job:
+  stage: build
+  script: 
+  - ${mvn_build_common} 
+  - ${mvn_build_target}
+  allow_failure: false
+  when: manual
+   
+deploy_job:
+  stage: deploy
+  script:
+  - ${cp_common_to_deploy_path}
+  - ${cp_code_to_deploy_path}
+
+restart_job:
+  stage: restart
+  script:
+  - cd  ${BINHOME} && bash -x shutdown.sh
+  - sleep 3
+  - cd  ${BINHOME} && bash -x startup.sh

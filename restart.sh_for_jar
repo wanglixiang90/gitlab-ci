@@ -1,0 +1,23 @@
+#!/bin/bash
+
+jarname=$1
+jarhome=$2
+run_cmd="$3"
+
+
+stop_jar(){
+pid=`ps aux |grep ${jarname} |grep -v grep |grep -v bash |awk -F ' ' '{print $(NF=2)}'`
+if [ ! -z "$pid" ]; then
+        kill -9 $pid
+fi
+}
+
+start_jar(){
+cd  ${jarhome}
+nohup ${run_cmd} >/dev/null 2>&1 &
+ps aux |grep ${jarname} |grep -v grep |grep -v bash 
+}
+
+stop_jar
+sleep 3
+start_jar
