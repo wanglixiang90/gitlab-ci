@@ -1,0 +1,40 @@
+variables:
+  VERSION: "1.0-SNAPSHOT"
+  JARNAME: "${CI_PROJECT_NAME}-${VERSION}.jar"
+  JARHOME: "/home/test/data/${CI_PROJECT_NAMESPACE}/${CI_PROJECT_NAME}"
+  BUILDHOME: "${CI_PROJECT_DIR}/target"
+  SHELLBASE: "/home/test/scripts/jarcmd"
+
+cache:
+  paths:
+  - ${BUILDHOME}/
+  
+stages:
+  - build
+  - deploy
+  - restart
+
+build_job:
+  stage: build
+  script: 
+  - mvn clean install -Dmaven.test.skip=true
+  allow_failure: false
+  when: manual
+  tags:
+  - tag01, tag02
+  
+deploy_job:
+  stage: deploy
+  script:  
+  - mkdir -p ${JARHOME}
+  - cp -r ${BUILDHOME}/*.jar  ${JARHOME}
+  - ls -l ${JARHOME} 
+  tags:
+  - tag01, tag02
+
+restart_job:
+  stage: restart
+  script:
+  - /bin/bash -x ${SHELLBASE}/restart.sh ${JARNAME} ${JARHOME}
+  tags:
+  - tag01, tag02
