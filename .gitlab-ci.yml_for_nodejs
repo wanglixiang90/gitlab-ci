@@ -1,0 +1,31 @@
+variables:
+  WEBHOME: "/home/test/data/${CI_PROJECT_NAMESPACE}/${CI_PROJECT_NAME}"
+  
+cache:
+  paths:
+  - $PWD/dist
+  - $PWD/node_modules
+
+stages:
+  - build
+  - deploy
+
+build_job:
+  stage: build
+  script: 
+  - echo "git pull..."
+  - cnpm install
+  - npm run build
+  allow_failure: false
+  when: manual
+  tags:
+  - tag01, tag02
+   
+deploy_job:
+  stage: deploy
+  script: 
+  - mkdir -p ${WEBHOME} 
+  - cp -r $PWD/dist/*  ${WEBHOME}
+  - ls -l ${WEBHOME} 
+  tags:
+  - tag01, tag02
